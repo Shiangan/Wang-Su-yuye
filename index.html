@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <!-- 提示語 -->
   <p class="share-tip" style="font-size: 0.9em; color: #666; margin-top: 0.5rem;">
-    ⚠️ 使用 Facebook 分享前，請先登入帳號。
+    ⚠️ 若 Facebook 分享未登入，請先登入帳號。
   </p>
 
   <!-- QR Code 區 -->
@@ -639,11 +639,15 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const originalUrl = "https://24hour.台灣/Wang-Su-yuye/";
-    const encodedUrl = encodeURIComponent(originalUrl);
-    const lineText = encodeURIComponent("誠摯邀請您一同追思：") + "%0A" + encodedUrl;
+    // 兩種網址版本
+    const urlPunycode = "https://24hour.xn--kpry57d/Wang-Su-yuye/";  // 給 Facebook 用
+    const urlUnicode = "https://24hour.台灣/Wang-Su-yuye/";          // 顯示 & 複製用
 
-    // 分享視窗彈出
+    const encodedPunycode = encodeURIComponent(urlPunycode);
+    const encodedUnicode = encodeURIComponent(urlUnicode);
+    const lineText = encodeURIComponent("誠摯邀請您一同追思：") + "%0A" + encodedUnicode;
+
+    // 開啟新視窗
     const openPopup = (url) => {
       const w = 600, h = 500;
       const left = (screen.width - w) / 2;
@@ -651,33 +655,32 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(url, "_blank", `width=${w},height=${h},top=${top},left=${left},resizable=yes`);
     };
 
-    // Facebook 分享
+    // Facebook 分享（用 Punycode）
     document.querySelector(".fb-share-btn").addEventListener("click", function (e) {
       e.preventDefault();
-      openPopup(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`);
+      openPopup(`https://www.facebook.com/sharer/sharer.php?u=${encodedPunycode}`);
     });
 
-    // LINE 分享
+    // LINE 分享（保留原始台灣網址）
     document.querySelector(".line-share-btn").addEventListener("click", function (e) {
       e.preventDefault();
       openPopup(`https://line.me/R/msg/text/?${lineText}`);
     });
 
-    // 複製連結
+    // 複製網址（顯示 .台灣 版本）
     document.querySelector(".copy-link-btn").addEventListener("click", async function () {
       try {
-        await navigator.clipboard.writeText(originalUrl);
+        await navigator.clipboard.writeText(urlUnicode);
         const tip = document.getElementById("copy-success");
         tip.style.display = "block";
         setTimeout(() => (tip.style.display = "none"), 3000);
       } catch (err) {
-        alert("複製失敗，請手動複製網址。");
+        alert("❌ 複製失敗，請手動複製網址。");
       }
     });
 
-    // 產生 QRCode
-    const qr = document.getElementById("qrcode");
-    QRCode.toCanvas(qr, originalUrl, {
+    // 產生 QRCode（用 .台灣 版本）
+    QRCode.toCanvas(document.getElementById("qrcode"), urlUnicode, {
       width: 128,
       margin: 1,
       color: { dark: "#000", light: "#fff" }
@@ -685,6 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) console.error(error);
     });
   });
+
     
         // 點擊名片圖片放大功能
     const cardImg = document.querySelector(".business-card-img");
