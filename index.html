@@ -570,51 +570,139 @@ document.addEventListener("DOMContentLoaded", () => {
     <img src="image/未命名設計.png" alt="名片" class="business-card-img" loading="lazy">
 </section>
 
-        <!-- 分享按鈕區 -->
-<section id="share-buttons">
-    <h2><strong>分享此頁面</strong></h2>
-    <div class="share-btns">
-        <!-- Facebook 分享按钮 -->
-        <a href="https://www.facebook.com/sharer/sharer.php?u=https://24hour.台灣/Wang-Su-yuye/" 
-           target="_blank" 
-           class="share-btn fb-share-btn" 
-           aria-label="Share on Facebook">
-            <img src="image/fb.png" alt="Share on Facebook" loading="lazy">
-        </a>
-        <!-- Line 分享按钮 -->
-        <a href="https://line.me/R/msg/text/?https://24hour.台灣/Wang-Su-yuye/" 
-           target="_blank" 
-           class="share-btn line-share-btn" 
-           aria-label="Share on Line">
-            <img src="image/line.png" alt="Share on Line" loading="lazy">
-        </a>
-    </div>
+<!-- 分享區塊（放在適合位置，建議 near bottom） -->
+<section id="share-buttons" aria-label="分享此訃聞頁面" style="margin: 2rem 0; text-align: center;">
+  <h2><strong>分享此頁面</strong></h2>
+  
+  <div class="share-btns">
+    <!-- Facebook 分享 -->
+    <a href="#" class="share-btn fb-share-btn" aria-label="分享到 Facebook">
+      <img src="image/fb.png" alt="Facebook 分享圖示" loading="lazy">
+    </a>
+    <!-- LINE 分享 -->
+    <a href="#" class="share-btn line-share-btn" aria-label="分享到 LINE">
+      <img src="image/line.png" alt="LINE 分享圖示" loading="lazy">
+    </a>
+    <!-- 複製連結 -->
+    <button class="share-btn copy-link-btn" aria-label="複製連結">
+      <img src="image/link.png" alt="複製連結圖示" loading="lazy">
+    </button>
+  </div>
+
+  <!-- 成功提示 -->
+  <p id="copy-success" style="display: none; color: green; font-size: 0.9em; margin-top: 0.5rem;">
+    ✅ 已成功複製網址！
+  </p>
+
+  <!-- 使用提示 -->
+  <p class="share-tip" style="font-size: 0.9em; color: #666; margin-top: 0.5rem;">
+    ⚠️ Facebook 分享前，請先登入帳號，否則會跳轉登入畫面。
+  </p>
+
+  <!-- QR Code 區塊 -->
+  <div id="qrcode" style="margin-top: 1rem;"></div>
 </section>
-        
+
+<!-- CSS 美化 -->
+<style>
+  .share-btns {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .share-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .share-btn img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .share-btn img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  }
+</style>
+
+<!-- JS 功能（含 QRCode 產生、分享視窗） -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // 获取当前页面的 URL
-        var currentUrl = window.location.href;
+  document.addEventListener("DOMContentLoaded", function () {
+    let currentUrl = "https://24hour.台灣/Wang-Su-yuye/";
+    const encodedUrl = encodeURIComponent(currentUrl);
+    const shareTitle = "誠摯邀請您一同追思：";
+    const lineText = encodeURIComponent(shareTitle) + "%0A" + encodedUrl;
 
-        // 获取当前页面的域名
-        var hostname = window.location.hostname;
+    const openShareWindow = (url) => {
+      const width = 600;
+      const height = 500;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      window.open(
+        url,
+        "_blank",
+        `width=${width},height=${height},top=${top},left=${left},resizable=yes`
+      );
+    };
 
-        // 检查域名是否是 Punycode 形式（比如：xn--kpry57d）
-        if (hostname.includes("xn--")) {
-            // 替换 Punycode 域名为原始的 .台灣 域名
-            currentUrl = currentUrl.replace(hostname, "24hour.台灣");
+    // Facebook
+    const fbBtn = document.querySelector(".fb-share-btn");
+    if (fbBtn) {
+      fbBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`);
+      });
+    }
+
+    // LINE
+    const lineBtn = document.querySelector(".line-share-btn");
+    if (lineBtn) {
+      lineBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openShareWindow(`https://line.me/R/msg/text/?${lineText}`);
+      });
+    }
+
+    // 複製連結
+    const copyBtn = document.querySelector(".copy-link-btn");
+    const copySuccess = document.getElementById("copy-success");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", async function () {
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          copySuccess.style.display = "block";
+          setTimeout(() => (copySuccess.style.display = "none"), 3000);
+        } catch (err) {
+          alert("複製失敗，請手動複製網址");
         }
+      });
+    }
 
-        // 编码 URL，确保特殊字符不会被错误处理
-        var encodedUrl = encodeURIComponent(currentUrl);
-
-        // 动态更新 Facebook 分享链接
-        var fbShareLink = document.querySelector('.fb-share-btn');
-        fbShareLink.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl;
-
-        // 动态更新 Line 分享链接
-        var lineShareLink = document.querySelector('.line-share-btn');
-        lineShareLink.href = "https://line.me/R/msg/text/?" + encodedUrl;
+    // QRCode
+    const qrcodeContainer = document.getElementById("qrcode");
+    if (qrcodeContainer && window.QRCode) {
+      QRCode.toCanvas(qrcodeContainer, currentUrl, {
+        width: 128,
+        margin: 1,
+        color: {
+          dark: "#000",
+          light: "#fff"
+        }
+      }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+  });
 
         // 點擊名片圖片放大功能
     const cardImg = document.querySelector(".business-card-img");
